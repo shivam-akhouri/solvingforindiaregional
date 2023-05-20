@@ -1,0 +1,10 @@
+0000000000000000000000000000000000000000 95a6ba8c1b92e3c2d46b60bceccd76c99082c0a2 Shivam Akhouri <shivamakhouri1142@gmail.com> 1683913270 +0530	commit (initial): initial repo
+95a6ba8c1b92e3c2d46b60bceccd76c99082c0a2 66c60a8bfe29fd7cfdf83346d09c06f3148c3898 Shivam Akhouri <shivamakhouri1142@gmail.com> 1683913357 +0530	pull origin master --allow-unrelated-histories: Merge made by the 'ort' strategy.
+66c60a8bfe29fd7cfdf83346d09c06f3148c3898 131860f554434aa75dc1b8141f9f5c8c4a73ad5d Shivam Akhouri <shivamakhouri1142@gmail.com> 1683914726 +0530	commit: origin added
+131860f554434aa75dc1b8141f9f5c8c4a73ad5d d393bfc354864c2fb1002d04fb0a56b08e6d9e8a Shivam Akhouri <shivamakhouri1142@gmail.com> 1683914978 +0530	commit: minor fix
+d393bfc354864c2fb1002d04fb0a56b08e6d9e8a 31a93c4495bb1c23bfa4e7f7a2dcba7d5f983dc0 Shivam Akhouri <shivamakhouri1142@gmail.com> 1683917101 +0530	commit: crop prediction api added
+31a93c4495bb1c23bfa4e7f7a2dcba7d5f983dc0 9e3c801a0eb09091c604f6a3101e26c1eab0d15c Shivam Akhouri <shivamakhouri1142@gmail.com> 1683918584 +0530	commit: chat api added
+9e3c801a0eb09091c604f6a3101e26c1eab0d15c 695c3d28d249c4e6aab32f585e0acd3dcd16c57b Shivam Akhouri <shivamakhouri1142@gmail.com> 1684517879 +0530	commit: one year future plan
+695c3d28d249c4e6aab32f585e0acd3dcd16c57b 86f67a0b58dc21ae7498884367fe61e82ae50fd1 Shivam Akhouri <shivamakhouri1142@gmail.com> 1684519277 +0530	commit: final api
+86f67a0b58dc21ae7498884367fe61e82ae50fd1 1cde78fd1b659f3b686bb373503235be5e68d12b Shivam Akhouri <shivamakhouri1142@gmail.com> 1684519376 +0530	pull: Merge made by the 'ort' strategy.
+1cde78fd1b659f3b686bb373503235be5e68d12b 2615e5f70a1b6e449b87dfca351105b89f0e664d Shivam Akhouri <shivamakhouri1142@gmail.com> 1684519521 +0530	commit: changed api key

@@ -1,0 +1,16 @@
+chatbot
+	integrate chatbot
+	speech to text and vice versa
+profile
+	drone integration
+dashboard
+	dashboard page
+	models page
+
+make the app multilingual
+
+
+backend
+model hosting
+drone socket server
+
