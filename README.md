@@ -29,8 +29,17 @@ To develop the proposed intelligent farming assistant system, we followed a stru
 
 - **Soil health monitoring system:**
 ![soil](https://raw.githubusercontent.com/shivam-akhouri/solvingforindiaregional/master/soilhealth.png)
+
 ![iot](https://raw.githubusercontent.com/shivam-akhouri/solvingforindiaregional/master/iot.png)
 
 - **Mobile Application:**
 
 ![app](https://raw.githubusercontent.com/shivam-akhouri/solvingforindiaregional/master/appss.png)
+
+## Colab links for ML model
+
+- SAM - https://colab.research.google.com/drive/1qznOahIQW5jgdxFmSkmwOOXORXNpco0k?usp=sharing
+- Yeild Prediction - https://colab.research.google.com/drive/1vpP7OH8Le0oT-TJ7yg8P6U-ZZdO-xSrM?usp=sharing
+- One year yeild - https://colab.research.google.com/drive/17wqY1WsKCb80jmhCOlhRw4Hsl5ae_REY?usp=sharing
+- Fertilizer - https://colab.research.google.com/drive/1OZ2JEPfzFJ3nL6KLSB3dOMmZ204oyDm-?usp=sharing
+- Crop Prediction - https://colab.research.google.com/drive/1OZ2JEPfzFJ3nL6KLSB3dOMmZ204oyDm-?usp=sharing
