@@ -82,7 +82,21 @@ def signup(request):
 def signin(request):
     pass
 
-def deleteUser
+def deleteUser(request):
+    body = json.loads(request.body)
+    phoneNumber = body['phone']
+    try:
+        doc_ref = firestore_client.collection(f"users/{phoneNumber}/user").document("details")
+        doc_ref.delete()
+        return JsonResponse({
+            "status": "success"
+        }, safe=False)
+    except: 
+        return JsonResponse({
+            "Status":"error",
+            "message": "Something went wrong! Please try after sometime."
+        })
+
 
 def createUser(request):
     body = json.loads(request.body)
