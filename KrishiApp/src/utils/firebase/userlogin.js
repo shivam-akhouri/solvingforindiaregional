@@ -1,0 +1,1 @@
+import { getAuth, RecaptchaVerifier } from "firebase/auth";

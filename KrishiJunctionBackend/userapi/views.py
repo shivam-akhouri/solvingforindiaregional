@@ -1,10 +1,17 @@
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
+import firebase_admin
+from firebase_admin import firestore
 from dotenv import load_dotenv
 import os
+import json
 import pyrebase
 import openai
 from googletrans import Translator
+
+cred = firebase_admin.credentials.Certificate("D:\hackathon\GFG\KrishiJunctionBackend\soilapi\solvingforind-firebase-adminsdk-eeo83-44ba4946bc.json")
+app = firebase_admin.initialize_app(cred, name="userapp")
+firestore_client = firestore.client()
 
 FIREBASE_CONFIG = {
   "apiKey": "AIzaSyDkAu8EB4WwJsYRUJx-XAWE4vPWBIeJAlg",
@@ -26,7 +33,7 @@ def chatbot(request):
         "telugu": "te",
         "hindi": "hi",
     }
-    openai.api_key = "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"
+    openai.api_key = "sk-..."
 
     messages = [
         {"role": "system", "content": """Your name is "AgriBot" and you are a smart chatbot assistant for our mobile application "Krishi Junction". Our app's main goal is to help integrating precision farming techniques and deliver it as an useful insight to the farmer. Main features of our app are:
@@ -75,12 +82,66 @@ def signup(request):
 def signin(request):
     pass
 
-def logout(request):
-    pass
+def deleteUser
 
 def createUser(request):
-    auth.create_user_with_email_and_password("shivam@gmail.com", "abc@12345")
-    return HttpResponse("done!")
+    body = json.loads(request.body)
+    phoneNumber = body['phone']
+    latitude = body['latitude']
+    longitude = body['longitude']
+    try:
+        doc_ref = firestore_client.collection(f"users/{phoneNumber}/user").document("details")
+        doc_ref.set({
+            "phone": str(phoneNumber),
+            "latitude": latitude,
+            "longitude": longitude
+        })
+        return JsonResponse({
+            "status": "success"
+        }, safe=False)
+    except: 
+        return JsonResponse({
+            "Status":"error",
+            "message": "Something went wrong! Please try after sometime."
+        })
+
+def checkUser(request):
+    body = json.loads(request.body)
+    phoneNumber = body['phone']
+    try:
+        is_doc = firestore_client.collection(f"users/{phoneNumber}/user").document("details").get().exists
+        if is_doc is True:
+            return JsonResponse({
+                "status":"success",
+                "message": "Document Found"
+            }, safe=False)
+        else:
+            return JsonResponse({
+                "status": "Fail",
+                "message": "Document not found"
+            }, safe=False)
+    except:
+        return JsonResponse({
+            "status": "Error"
+        }, safe=False)
+
 
 def updateProfile(request):
-    pass
+    body = json.loads(request.body)
+    phoneNumber = body['phone']
+    latitude = body['latitude']
+    longitude = body['longitude']
+    try:
+        doc_ref = firestore_client.collection(f"users/{phoneNumber}/user").document("details")
+        doc_ref.update({
+            "latitude": latitude,
+            "longitude": longitude
+        })
+        return JsonResponse({
+            "status": "success"
+        }, safe=False)
+    except: 
+        return JsonResponse({
+            "Status":"error",
+            "message": "Something went wrong! Please try after sometime."
+        })

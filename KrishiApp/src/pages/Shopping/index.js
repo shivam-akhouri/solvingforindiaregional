@@ -1,5 +1,5 @@
 import { View, Text, Image, StyleSheet, TextInput, TouchableOpacity, ActivityIndicator, ScrollView, Linking } from 'react-native'
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import Header from '../../components/Header'
 import SunPlant from '../../assets/pictures/plantSun.png'
 import { GiftedChat } from 'react-native-gifted-chat'
@@ -8,8 +8,12 @@ import { t } from '../../utils/language'
 import { useSelector } from 'react-redux'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import { Card, Button } from 'react-native-paper'
+import BottomSheet from '../../components/BottomSheet'
+import RBSheet from "react-native-raw-bottom-sheet";
 
 export default function Market(props) {
+    const btRef = useRef()
+
     const [item, setItem] = useState("")
     const [loading, setLoading] = useState(false)
     const [results, setResults] = useState(null)
@@ -45,23 +49,62 @@ export default function Market(props) {
             {
                 loading === true ? <ActivityIndicator color={"green"} size={"large"} /> : null
             }
-            <ScrollView style={{marginTop: 20}}>
+            <ScrollView style={{ marginTop: 20 }}>
 
                 {
                     results !== null && results !== undefined && (
                         results.map(val => (
-                            <Card style={{width:"95%", alignSelf:"center", marginVertical: 5, }}>
-                                <Card.Title titleNumberOfLines={3} left={()=>(<MaterialCommunityIcons name="barn" size={40} color={"green"} />)} title={val.title} subtitle={val.rating !== undefined ? `${val.rating} ⭐`:""} />
+                            <Card style={{ width: "95%", alignSelf: "center", marginVertical: 5, }}>
+                                <Card.Title titleNumberOfLines={3} left={() => (<MaterialCommunityIcons name="barn" size={40} color={"green"} />)} title={val.title} subtitle={val.rating !== undefined ? `${val.rating} ⭐` : ""} />
                                 <Card.Cover source={{ uri: val.image }} />
                                 <Card.Actions>
-                                    <Button textColor='green'>{val.sponsored === true ? `Sponsored ${val.rating != undefined ? `| Rating :${val.rating}`:""}`:`New Product ${val.rating != undefined ? `| Rating :${val.rating}`:""}`}</Button>
-                                    <Button buttonColor='green' onPress={()=>Linking.openURL(val.link)}>{val.prices === undefined ? 0 : val.prices[0].raw}</Button>
+                                    <Button textColor='green'>{val.sponsored === true ? `Sponsored ${val.rating != undefined ? `| Rating :${val.rating}` : ""}` : `New Product ${val.rating != undefined ? `| Rating :${val.rating}` : ""}`}</Button>
+                                    <Button buttonColor='green' onPress={() => Linking.openURL(val.link)}>{val.prices === undefined ? 0 : val.prices[0].raw}</Button>
                                 </Card.Actions>
                             </Card>
                         ))
                     )
                 }
             </ScrollView>
+            <RBSheet
+                ref={btRef}
+                closeOnDragDown={true}
+                closeOnPressMask={false}
+                openDuration={250}
+                height={600}
+                customStyles={{
+                    container: {
+                        justifyContent: "center",
+                        alignItems: "center"
+                    }
+                }}
+                >
+                    <ScrollView>
+
+                    <View style={{
+                        width: "95%",
+                        height: 200,
+                        alignSelf: "center",
+                        backgroundColor: "#999",
+                        borderRadius: 15,
+                        marginTop: 15
+                    }}>
+
+                    </View>
+                <Text style={{color:"black"}}>lsvbiuopnd fgyiWHBUVC734BRC6 T9FHUEWBF TVC87I8IFEHV BT876G78OUICB Ṭ7UKF8N 8O9UN98UY 8NQ7O NRBVC68IWEG</Text>
+                <Text style={{color:"black"}}>lsvbiuopnd fgyiWHBUVC734BRC6 T9FHUEWBF TVC87I8IFEHV BT876G78OUICB Ṭ7UKF8N 8O9UN98UY 8NQ7O NRBVC68IWEG</Text>
+                <Text style={{color:"black"}}>lsvbiuopnd fgyiWHBUVC734BRC6 T9FHUEWBF TVC87I8IFEHV BT876G78OUICB Ṭ7UKF8N 8O9UN98UY 8NQ7O NRBVC68IWEG</Text>
+                <Text style={{color:"black"}}>lsvbiuopnd fgyiWHBUVC734BRC6 T9FHUEWBF TVC87I8IFEHV BT876G78OUICB Ṭ7UKF8N 8O9UN98UY 8NQ7O NRBVC68IWEG</Text>
+                <Text style={{color:"black"}}>lsvbiuopnd fgyiWHBUVC734BRC6 T9FHUEWBF TVC87I8IFEHV BT876G78OUICB Ṭ7UKF8N 8O9UN98UY 8NQ7O NRBVC68IWEG</Text>
+                <Text style={{color:"black"}}>lsvbiuopnd fgyiWHBUVC734BRC6 T9FHUEWBF TVC87I8IFEHV BT876G78OUICB Ṭ7UKF8N 8O9UN98UY 8NQ7O NRBVC68IWEG</Text>
+                <Text style={{color:"black"}}>lsvbiuopnd fgyiWHBUVC734BRC6 T9FHUEWBF TVC87I8IFEHV BT876G78OUICB Ṭ7UKF8N 8O9UN98UY 8NQ7O NRBVC68IWEG</Text>
+                <Text style={{color:"black"}}>lsvbiuopnd fgyiWHBUVC734BRC6 T9FHUEWBF TVC87I8IFEHV BT876G78OUICB Ṭ7UKF8N 8O9UN98UY 8NQ7O NRBVC68IWEG</Text>
+                <Text style={{color:"black"}}>lsvbiuopnd fgyiWHBUVC734BRC6 T9FHUEWBF TVC87I8IFEHV BT876G78OUICB Ṭ7UKF8N 8O9UN98UY 8NQ7O NRBVC68IWEG</Text>
+                <Text style={{color:"black"}}>lsvbiuopnd fgyiWHBUVC734BRC6 T9FHUEWBF TVC87I8IFEHV BT876G78OUICB Ṭ7UKF8N 8O9UN98UY 8NQ7O NRBVC68IWEG</Text>
+                <Text style={{color:"black"}}>lsvbiuopnd fgyiWHBUVC734BRC6 T9FHUEWBF TVC87I8IFEHV BT876G78OUICB Ṭ7UKF8N 8O9UN98UY 8NQ7O NRBVC68IWEG</Text>
+                <Text style={{color:"black"}}>lsvbiuopnd fgyiWHBUVC734BRC6 T9FHUEWBF TVC87I8IFEHV BT876G78OUICB Ṭ7UKF8N 8O9UN98UY 8NQ7O NRBVC68IWEG</Text>
+                        </ScrollView>
+            </RBSheet>
         </View>
     )
 }

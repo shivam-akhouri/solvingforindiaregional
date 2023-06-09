@@ -8,5 +8,6 @@ urlpatterns = [
     path('logout/', views.logout, name='index'),
     path('createUser/', views.createUser, name='index'),
     path('updateProfile/', views.updateProfile, name='index'),
+    path('checkUser/', views.checkUser, name='index'),
     path("chat/", views.chatbot)
 ]

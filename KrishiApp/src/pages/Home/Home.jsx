@@ -20,6 +20,7 @@ import Header from '../../components/Header';
 import { t } from '../../utils/language';
 import language from '../../redux/reducers/language';
 import { ActivityIndicator } from 'react-native-paper';
+import { AnimationTriggerType, AnimationType, AnimationWrapperView } from 'animation-wrapper-view';
 
 const Home = ({ navigation }) => {
 
@@ -65,11 +66,21 @@ const Home = ({ navigation }) => {
                 console.warn(code, message);
             })
 
-            fetch("https://newsapi.org/v2/everything?q=agriculture%20products%20india&apiKey=8ece078dac504ec0a15188e4886c61c9")
-            .then(res=>res.json())
-            .then(res=>setNews(res.articles))
+        fetch("https://newsapi.org/v2/everything?q=agriculture%20products%20india&apiKey=8ece078dac504ec0a15188e4886c61c9")
+            .then(res => res.json())
+            .then(res => setNews(res.articles))
     }, [])
-    const language = useSelector(state=>state.language.language)
+    const language = useSelector(state => state.language.language)
+
+
+    const fadeConfig = {
+        type: AnimationType.FADE,
+        triggerType: AnimationTriggerType.ON_LOAD,
+        initialOpacity: 0,
+        finalOpacity: 1,
+        animationDuration: 500
+    }
+
 
     return (
         <View style={styles.mainContainer}>
@@ -78,7 +89,7 @@ const Home = ({ navigation }) => {
             <ScrollView style={styles.InnerMain}>
                 <Text style={styles.mainText}>{t[language]["Weather Condition"]}</Text>
                 <View style={styles.row}>
-                    <View style={{borderWidth: 1, borderColor: "green", borderRadius: 15}}>
+                    <View style={{ borderWidth: 1, borderColor: "green", borderRadius: 15 }}>
                         <Image source={{ uri: `https://${icon}` }} style={{ width: 60, height: 60 }} />
                     </View>
                     <View>
@@ -98,54 +109,60 @@ const Home = ({ navigation }) => {
                     </View>
                 </View>
                 <Text style={styles.mainText}>{t[language]["Current Task"]}</Text>
+                <AnimationWrapperView animationConfig={fadeConfig}>
 
-                <TouchableOpacity onPress={() => navigation.navigate('Modules')}>
-                    <View style={styles.card} >
-                        <View style={{ width: 90, height: 90, backgroundColor: "#ebb215", borderRadius: 10 }}>
-                            <Text style={{ color: "white", fontSize: 28, textAlign: "center", fontFamily: "WorkSans-ExtraBold" }}>2d due</Text>
+                    <TouchableOpacity onPress={() => navigation.navigate('Modules')}>
+                        <View style={styles.card} >
+                            <View style={{ width: 90, height: 90, backgroundColor: "#ebb215", borderRadius: 10 }}>
+                                <Text style={{ color: "white", fontSize: 28, textAlign: "center", fontFamily: "WorkSans-ExtraBold" }}>2d due</Text>
+                            </View>
+                            <View style={{ width: 250, paddingLeft: 15 }}>
+                                <Text style={{ color: "black", fontFamily: "WorkSans-Medium" }}>Scheduled Spray was not performed. 2 days left</Text>
+                                <Text style={{ color: "black", fontFamily: "WorkSans-Medium", paddingVertical: 5, paddingHorizontal: 5, backgroundColor: "#ccc", width: 100, borderRadius: 10, textAlign: "center", marginTop: 10 }}>Maize #1</Text>
+                            </View>
                         </View>
-                        <View style={{ width: 250, paddingLeft: 15 }}>
-                            <Text style={{ color: "black", fontFamily: "WorkSans-Medium" }}>Scheduled Spray was not performed. 2 days left</Text>
-                            <Text style={{ color: "black", fontFamily: "WorkSans-Medium", paddingVertical: 5, paddingHorizontal: 5, backgroundColor: "#ccc", width: 100, borderRadius: 10, textAlign: "center", marginTop: 10 }}>Maize #1</Text>
+                    </TouchableOpacity>
+                </AnimationWrapperView>
+                <AnimationWrapperView animationConfig={{...fadeConfig, triggerDelay: 200}}>
+                    <TouchableOpacity onPress={() => navigation.navigate('DashBoard')}>
+                        <View style={styles.card} >
+                            <View style={{ width: 90, height: 90, backgroundColor: "#ebb215", borderRadius: 10 }}>
+                                <Text style={{ color: "white", fontSize: 28, textAlign: "center", fontFamily: "WorkSans-ExtraBold" }}>2d due</Text>
+                            </View>
+                            <View style={{ width: 250, paddingLeft: 15 }}>
+                                <Text style={{ color: "black", fontFamily: "WorkSans-Medium" }}>Requires Fertilization. Downward nutrition trends from past two weeks</Text>
+                                <Text style={{ color: "black", fontFamily: "WorkSans-Medium", paddingVertical: 3, paddingHorizontal: 5, backgroundColor: "#ccc", width: 100, borderRadius: 10, textAlign: "center", marginTop: 5 }}>Maize #1</Text>
+                            </View>
                         </View>
-                    </View>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => navigation.navigate('DashBoard')}>
-                    <View style={styles.card} >
-                        <View style={{ width: 90, height: 90, backgroundColor: "#ebb215", borderRadius: 10 }}>
-                            <Text style={{ color: "white", fontSize: 28, textAlign: "center", fontFamily: "WorkSans-ExtraBold" }}>2d due</Text>
+                    </TouchableOpacity>
+                </AnimationWrapperView>
+                <AnimationWrapperView animationConfig={{...fadeConfig, triggerDelay: 200}}>
+                    <TouchableOpacity onPress={() => navigation.navigate('DashBoard')}>
+                        <View style={styles.card} >
+                            <View style={{ width: 90, height: 90, backgroundColor: "green", borderRadius: 10 }}>
+                                <Text style={{ color: "white", fontSize: 28, textAlign: "center", fontFamily: "WorkSans-ExtraBold" }}>2d due</Text>
+                            </View>
+                            <View style={{ width: 250, paddingLeft: 15 }}>
+                                <Text style={{ color: "black", fontFamily: "WorkSans-Medium" }}>Scheduled Spray was not performed. 2 days left</Text>
+                                <Text style={{ color: "black", fontFamily: "WorkSans-Medium", paddingVertical: 5, paddingHorizontal: 5, backgroundColor: "#ccc", width: 100, borderRadius: 10, textAlign: "center", marginTop: 10 }}>Maize #1</Text>
+                            </View>
                         </View>
-                        <View style={{ width: 250, paddingLeft: 15 }}>
-                            <Text style={{ color: "black", fontFamily: "WorkSans-Medium" }}>Requires Fertilization. Downward nutrition trends from past two weeks</Text>
-                            <Text style={{ color: "black", fontFamily: "WorkSans-Medium", paddingVertical: 3, paddingHorizontal: 5, backgroundColor: "#ccc", width: 100, borderRadius: 10, textAlign: "center", marginTop: 5 }}>Maize #1</Text>
-                        </View>
-                    </View>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => navigation.navigate('DashBoard')}>
-                    <View style={styles.card} >
-                        <View style={{ width: 90, height: 90, backgroundColor: "green", borderRadius: 10 }}>
-                            <Text style={{ color: "white", fontSize: 28, textAlign: "center", fontFamily: "WorkSans-ExtraBold" }}>2d due</Text>
-                        </View>
-                        <View style={{ width: 250, paddingLeft: 15 }}>
-                            <Text style={{ color: "black", fontFamily: "WorkSans-Medium" }}>Scheduled Spray was not performed. 2 days left</Text>
-                            <Text style={{ color: "black", fontFamily: "WorkSans-Medium", paddingVertical: 5, paddingHorizontal: 5, backgroundColor: "#ccc", width: 100, borderRadius: 10, textAlign: "center", marginTop: 10 }}>Maize #1</Text>
-                        </View>
-                    </View>
-                </TouchableOpacity>
+                    </TouchableOpacity>
+                </AnimationWrapperView>
                 <Text style={styles.mainText}>{"Sensor Status"}</Text>
                 <View style={styles.sensorcard}>
                     <MaterialCommunityIcons name="poker-chip" color={"green"} size={50} />
                     <View>
                         <Text style={styles.sensorcardtitle}>N-P-K Sensor</Text>
                         <Text style={styles.sensorcardsubtitle}>Device Id: nm0001</Text>
-                        <Text style={[styles.sensorcardsubtitle, {fontSize: 8}]}>Last data sync: 15mins ago</Text>
+                        <Text style={[styles.sensorcardsubtitle, { fontSize: 8 }]}>Last data sync: 15mins ago</Text>
                     </View>
                     <View>
-                        <View style={{flexDirection: "row", alignItems:"center", justifyContent:"space-between",}}>
+                        <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", }}>
                             <Text style={styles.sensorcardright}>Device Health: Ok</Text>
                             <View style={styles.sensorcardcircle} />
                         </View>
-                        <View style={{flexDirection: "row", alignItems:"center", justifyContent:"space-between",}}>
+                        <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", }}>
                             <Text style={styles.sensorcardright}>Status: Normal</Text>
                             <View style={styles.sensorcardcircle} />
                         </View>
@@ -156,14 +173,14 @@ const Home = ({ navigation }) => {
                     <View>
                         <Text style={styles.sensorcardtitle}>pH-Temp Sen.</Text>
                         <Text style={styles.sensorcardsubtitle}>Device Id: pt0001</Text>
-                        <Text style={[styles.sensorcardsubtitle, {fontSize: 8}]}>Last data sync: 7mins ago</Text>
+                        <Text style={[styles.sensorcardsubtitle, { fontSize: 8 }]}>Last data sync: 7mins ago</Text>
                     </View>
                     <View>
-                        <View style={{flexDirection: "row", alignItems:"center", justifyContent:"space-between",}}>
+                        <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", }}>
                             <Text style={styles.sensorcardright}>Device Health: Ok</Text>
                             <View style={styles.sensorcardcircle} />
                         </View>
-                        <View style={{flexDirection: "row", alignItems:"center", justifyContent:"space-between",}}>
+                        <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", }}>
                             <Text style={styles.sensorcardright}>Status: Normal</Text>
                             <View style={styles.sensorcardcircle} />
                         </View>
@@ -174,14 +191,14 @@ const Home = ({ navigation }) => {
                     <View>
                         <Text style={styles.sensorcardtitle}>NDVI Sensor</Text>
                         <Text style={styles.sensorcardsubtitle}>Device Id: nd0001</Text>
-                        <Text style={[styles.sensorcardsubtitle, {fontSize: 8}]}>Last data sync: 2mins ago</Text>
+                        <Text style={[styles.sensorcardsubtitle, { fontSize: 8 }]}>Last data sync: 2mins ago</Text>
                     </View>
                     <View>
-                        <View style={{flexDirection: "row", alignItems:"center", justifyContent:"space-between",}}>
+                        <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", }}>
                             <Text style={styles.sensorcardright}>Device Health: Ok</Text>
                             <View style={styles.sensorcardcircle} />
                         </View>
-                        <View style={{flexDirection: "row", alignItems:"center", justifyContent:"space-between",}}>
+                        <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", }}>
                             <Text style={styles.sensorcardright}>Status: Normal</Text>
                             <View style={styles.sensorcardcircle} />
                         </View>
@@ -190,22 +207,22 @@ const Home = ({ navigation }) => {
 
                 <Text style={styles.mainText}>{"Current News"}</Text>
                 {news === null && <ActivityIndicator color='green' size={"large"} />}
-                {news !== null && news !== undefined && news.map(val=>(
+                {news !== null && news !== undefined && news.map(val => (
                     <TouchableOpacity onPress={() => Linking.openURL(val.url)}>
-                    <View style={styles.card} >
-                        <View style={{ width: 90, height: 90, backgroundColor: "green", borderRadius: 10 }}>
-                            <Image source={{uri: val.urlToImage}} style={{width:90, height: 90, borderRadius: 10}}/>
+                        <View style={styles.card} >
+                            <View style={{ width: 90, height: 90, backgroundColor: "green", borderRadius: 10 }}>
+                                <Image source={{ uri: val.urlToImage }} style={{ width: 90, height: 90, borderRadius: 10 }} />
+                            </View>
+                            <View style={{ width: 250, paddingLeft: 15 }}>
+                                <Text style={{ color: "black", fontFamily: "WorkSans-Medium" }} numberOfLines={3}>{val.title}</Text>
+                                <Text numberOfLines={2} style={{ color: "#00000050", paddingHorizontal: 2, borderRadius: 10, textAlign: "left", }}>{val.author}</Text>
+                            </View>
                         </View>
-                        <View style={{ width: 250, paddingLeft: 15 }}>
-                            <Text style={{ color: "black", fontFamily: "WorkSans-Medium" }} numberOfLines={3}>{val.title}</Text>
-                            <Text numberOfLines={2} style={{ color: "#00000050", paddingHorizontal: 2, borderRadius: 10, textAlign: "left", }}>{val.author}</Text>
-                        </View>
-                    </View>
-                </TouchableOpacity>
+                    </TouchableOpacity>
                 ))}
 
             </ScrollView>
-            <StatusBar backgroundColor={"#229D3D"}/>
+            <StatusBar backgroundColor={"#229D3D"} />
 
         </View>
     )
@@ -350,47 +367,47 @@ const styles = StyleSheet.create({
         width: '95%',
         alignSelf: 'center',
     },
-    sensorcard:{
+    sensorcard: {
         marginVertical: 5,
-        widh:"95%",
-        backgroundColor:"#77cc7730",
+        widh: "95%",
+        backgroundColor: "#77cc7730",
         height: 75,
         borderRadius: 15,
-        flexDirection:"row",
-        borderWidth:1,
+        flexDirection: "row",
+        borderWidth: 1,
         borderColor: "green",
-        alignItems:'center',
+        alignItems: 'center',
         paddingLeft: 10
     },
     sensorcardtitle: {
         fontFamily: "WorkSans-Medium",
         fontSize: 16,
         fontWeight: "700",
-        color:"black",
+        color: "black",
         paddingLeft: 15
     },
     sensorcardsubtitle: {
         fontFamily: "WorkSans-Medium",
         fontSize: 12,
-        color:"#222",
+        color: "#222",
         paddingLeft: 15
     },
     sensorcardright: {
         fontFamily: "WorkSans-ExtraBold",
         fontSize: 12,
-        color:"green",
+        color: "green",
         paddingLeft: 15,
-        alignSelf:"flex-end",
+        alignSelf: "flex-end",
     },
-    sensorcardcircle:{
+    sensorcardcircle: {
         width: 20,
         height: 20,
         borderRadius: 10,
-        backgroundColor:"green",
+        backgroundColor: "green",
         marginLeft: 15,
         marginTop: 5
     }
-    
+
 })
 
 export default Home
