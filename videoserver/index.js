@@ -15,6 +15,7 @@ var io = require("socket.io")(http, {
 }) 
 
 app.get('/', (req, res)=>{
+    console.log(port)
     res.send("Connection is established")
 })
 
