@@ -87,46 +87,8 @@ def ndvi(request):
     from groundingdino.util.inference import annotate, predict
     from huggingface_hub import hf_hub_download
     from typing import Tuple
+    from PIL import ImageEnhance
     device = 'cpu'
-    def load_dataset(path):
-        images = []
-        names = []
-        for file_name in os.listdir(path):
-            if file_name.endswith("_rgb.png"):
-                image_path = os.path.join(path, file_name)
-                image = Image.open(image_path).convert("RGB")
-                images.append(image)
-                names.append(file_name.replace("_rgb.png", ""))
-        return images, names
-    canon_img_path = "/home/shivam_akhouri2020/solvingforindiaregional/GroundingDINO/Plant_Phenotyping_Datasets/Plant/Ara2013-Canon"
-    rpi_img_path = "/home/shivam_akhouri2020/solvingforindiaregional/GroundingDINO/Plant_Phenotyping_Datasets/Plant/Ara2013-RPi"
-    canon_imgs, canon_names = load_dataset(canon_img_path)
-    print("Cannon: ",len(canon_imgs))
-    rpi_imgs, rpi_names = load_dataset(rpi_img_path)
-    print("RPi: ",len(rpi_imgs))
-    def calculate_ndvi(red_band, green_band):
-        red_array = np.array(red_band, dtype=float)
-        green_array = np.array(green_band, dtype=float)
-        ndvi = (green_array - red_array) / (green_array + red_array)
-        return ndvi
-    def get_results(dataset, names, colormap, path, normalization):
-        ndvi_values = []
-        for im, name in zip(dataset, names):
-            cont = ImageEnhance.Contrast(im)
-            imgc = cont.enhance(1.5)
-            r, g, b = imgc.split()
-
-            ndvi = calculate_ndvi(r, g)
-            ndvi_values.append(np.mean(ndvi.astype(np.uint8)))
-            ndvi_normalized = ((ndvi + 1) * normalization).astype(np.uint8)
-            colormapped = cv2.applyColorMap(ndvi_normalized, colormap)
-
-            ndvi_normalized = Image.fromarray(ndvi_normalized)
-            ndvi_normalized.save(os.path.join(path, f'{name}_ndvi.png'))
-            ndvi_colormapped = Image.fromarray(colormapped)
-            ndvi_colormapped.save(os.path.join(path, f'{name}_ndvi_colormapped.png'))
-        df = pd.DataFrame({'Image Name': names, 'Mean NDVI': ndvi_values})
-        df.to_csv(os.path.join(path, 'ndvi_mean_values.csv'), index=False)
     fastie = np.zeros((256, 1, 3), dtype=np.uint8)
     fastie[:, 0, 2] = [255, 250, 246, 242, 238, 233, 229, 225, 221, 216, 212, 208, 204, 200, 195, 191, 187, 183, 178, 174, 170, 166, 161, 157, 153, 149, 145, 140, 136, 132, 128, 123, 119, 115, 111, 106, 102, 98, 94, 90, 85, 81, 77, 73, 68, 64, 60, 56, 52, 56, 60, 64, 68, 73, 77, 81, 85, 90, 94, 98, 102, 106, 111, 115, 119, 123, 128, 132, 136, 140, 145, 149, 153, 157, 161, 166, 170, 174, 178, 183, 187, 191, 195, 200, 204, 208, 212, 216, 221, 225, 229, 233, 238, 242, 246, 250, 255, 250, 245, 240, 235, 230, 225, 220, 215, 210, 205, 200, 195, 190, 185, 180, 175, 170, 165, 160, 155, 151, 146, 141, 136, 131, 126, 121, 116, 111, 106, 101, 96, 91, 86, 81, 76, 71, 66, 61, 56, 66, 77, 87, 98, 108, 119, 129, 140, 131, 122, 113, 105, 96, 87, 78, 70, 61, 52, 43, 35, 26, 17, 8, 0, 7, 15, 23, 31, 39, 47, 55, 63, 71, 79, 87, 95, 103, 111, 119, 127, 135, 143, 151, 159, 167, 175, 183, 191, 199, 207, 215, 223, 231, 239, 247, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255]
     fastie[:, 0, 1] = [255, 250, 246, 242, 238, 233, 229, 225, 221, 216, 212, 208, 204, 200, 195, 191, 187, 183, 178, 174, 170, 166, 161, 157, 153, 149, 145, 140, 136, 132, 128, 123, 119, 115, 111, 106, 102, 98, 94, 90, 85, 81, 77, 73, 68, 64, 60, 56, 52, 56, 60, 64, 68, 73, 77, 81, 85, 90, 94, 98, 102, 106, 111, 115, 119, 123, 128, 132, 136, 140, 145, 149, 153, 157, 161, 166, 170, 174, 178, 183, 187, 191, 195, 200, 204, 208, 212, 216, 221, 225, 229, 233, 238, 242, 246, 250, 255, 250, 245, 240, 235, 230, 225, 220, 215, 210, 205, 200, 195, 190, 185, 180, 175, 170, 165, 160, 155, 151, 146, 141, 136, 131, 126, 121, 116, 111, 106, 101, 96, 91, 86, 81, 76, 71, 66, 61, 56, 66, 77, 87, 98, 108, 119, 129, 140, 147, 154, 161, 168, 175, 183, 190, 197, 204, 211, 219, 226, 233, 240, 247, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 249, 244, 239, 233, 228, 223, 217, 212, 207, 201, 196, 191, 185, 180, 175, 170, 164, 159, 154, 148, 143, 138, 132, 127, 122, 116, 111, 106, 100, 95, 90, 85, 79, 74, 69, 63, 58, 53, 47, 42, 37, 31, 26, 21, 15, 10, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
@@ -144,22 +106,7 @@ def ndvi(request):
         image = np.asarray(image_source)
         image_transformed, _ = transform(image_source, None)
         return image, image_transformed
-    def load_images(path):
-        images = []
-        image_sources = []
-        names = []
-        for file_name in os.listdir(path):
-            if file_name.endswith("_rgb.png"):
-                image_path = os.path.join(path, file_name)
-                image_source, image = load_image(image_path)
-                image_sources.append(image_source)
-                images.append(image)
-                names.append(file_name.replace("_rgb.png", ""))
-        return image_sources, images, names
-    canon_img_sources, canon_imgs, canon_names = load_images(canon_img_path)
-    print("Cannon: ",len(canon_imgs))
-    rpi_img_sources, rpi_imgs, rpi_names = load_images(rpi_img_path)
-    print("RPi: ",len(rpi_imgs))
+    image_source, image = load_image("/home/shivam_akhouri2020/solvingforindiaregional/KrishiJunctionBackend/MLapi/plant_image.jpg")
     def load_model(path, config, device='cpu'):
         args = SLConfig.fromfile(config)
         args.device = device
@@ -172,27 +119,10 @@ def ndvi(request):
         return model
 
     gdmodel = load_model("/home/shivam_akhouri2020/solvingforindiaregional/GroundingDINO/groundingdino_swinb_cogcoor.pth", "/home/shivam_akhouri2020/solvingforindiaregional/GroundingDINO/GroundingDINO_SwinB.cfg.py", device)
-    def detect_plants(image_sources, images, names, path, gdmodel):
-        frames = []
-        box_list = []
-        plants = []
-        for image_source, image, name in zip(image_sources, images, names):
-            boxes, logits, phrases = predict(model = gdmodel, device=device, image = image, caption = "plant", box_threshold = 0.3, text_threshold = 0.25)
-            frame = annotate(image_source = image_source, boxes = boxes, logits = logits, phrases = phrases)
-            frame = frame[...,::-1]
-            frames.append(frame)
-            box_list.append(boxes)
-            plants.append(len(boxes))
-            img = Image.fromarray(frame)
-            img.save(os.path.join(path, f'{name}_boxed.png'))
-        df = pd.DataFrame({'Image Name': names, 'Number of plants detected': plants})
-        df.to_csv(os.path.join(path, 'GD_plants_detected.csv'), index=False)
-        return frames, box_list
-    canon_img_frames, canon_img_boxes = detect_plants(canon_img_sources, canon_imgs, canon_names, canon_img_path, gdmodel)
-    rpi_img_frames, rpi_img_boxes = detect_plants(rpi_img_sources, rpi_imgs, rpi_names, rpi_img_path, gdmodel)
-    data = pd.read_csv(canon_img_path + "/GD_plants_detected.csv")
-    temp = data[data['Number of plants detected'] > 1]
-    temp.head()
+    boxes, logits, phrases = predict(model = gdmodel, image = image, caption = "plant", box_threshold = 0.3, text_threshold = 0.25)
+    frame = annotate(image_source = image_source, boxes = boxes, logits = logits, phrases = phrases)
+    frame = frame[...,::-1]
+
     sam = SamPredictor(build_sam(checkpoint="/home/shivam_akhouri2020/solvingforindiaregional/GroundingDINO/sam_vit_h_4b8939.pth").to(device))
     print("Reached Load Model")
     def segment(image, sam_model, boxes):
@@ -208,23 +138,10 @@ def ndvi(request):
             multimask_output = False,
             )
         return masks.cpu()
-    def draw_mask(mask, image):
-        color = np.concatenate([np.random.random(3), np.array([0.8])], axis=0)
-        h, w = mask.shape[-2:]
-        mask_image = mask.reshape(h, w, 1) * color.reshape(1, 1, -1)
 
-        annotated_frame_pil = Image.fromarray(image).convert("RGBA")
-        mask_image_pil = Image.fromarray((mask_image.cpu().numpy() * 255).astype(np.uint8)).convert("RGBA")
-        return np.array(Image.alpha_composite(annotated_frame_pil, mask_image_pil))
-    print("Reached Draw_mask")
-    def get_segmented_plants(sources, model, boxes, frames, names, path):
-        masks = []
-        for image, box, frame, name in zip(sources, boxes, frames, names):
-            mask = segment(image,model,box)
-            masks.append(mask)
-        return masks
-    canon_img_mask = get_segmented_plants(canon_img_sources, sam, canon_img_boxes, canon_img_frames, canon_names, canon_img_path)
-    rpi_img_mask = get_segmented_plants(rpi_img_sources, sam, rpi_img_boxes, rpi_img_frames, rpi_names, rpi_img_path)
+    segmented_frame_masks = segment(image_source, sam, boxes=boxes)
+    mask = segmented_frame_masks[3][0].numpy()
+    
     def contrast_segment(im):
         in_min = np.percentile(im, 5)
         in_max = np.percentile(im, 95)
@@ -234,14 +151,54 @@ def ndvi(request):
         out *= ((out_max - out_min) / (in_max - in_min))
         out += out_min
         return out.astype(np.uint8)
+    imgs = image_source.copy()
     contrasted = contrast_segment(imgs)
-    print(contrasted)
-    # x, y = mask.shape
-    # for i in range(x):
-    #     for j in range(y):
-    #         if(mask[i][j]):
-    #             imgc[i][j] = contrasted[i][j]
-    #     print(imgc)
+    imgc = imgs.zeros_like(imgs)
+    x, y = mask.shape
+    for i in range(x):
+        for j in range(y):
+            if(mask[i][j]):
+                imgc[i][j] = contrasted[i][j]
+    def ndvi_segment(image, mask):
+        x, y, z = image.shape
+        ndvi_img = np.zeros_like(mask)
+        for i in range(x):
+            for j in range(y):
+                if not np.array_equal(image[i][j], np.array([0, 0 ,0])):
+                    r = image[i,j,0]
+                    b = image[i,j,2]
+                    n = r - b
+                    d = r + b
+                    if d == 0:
+                        d = 0.01
+                    ndvi_img[i][j] = n/d
+
+        return (ndvi_img).astype(np.uint8)
+
+    ndvi = ndvi_segment(imgc, mask)
+    def ndvi_contrast(image):
+        image_normalized = (image - np.nanmin(image)) / (np.nanmax(image) - np.nanmin(image))
+        image_contrast = (image_normalized - 0.5) * 2
+        return image_contrast
+
+    # Assuming you already have the NDVI and mask arrays
+    ndvi_array = np.array(ndvi)
+    mask_array = np.array(mask)
+
+    # Apply the mask to the NDVI array
+    masked_ndvi_array = np.where(mask_array > 0, ndvi_array, np.nan)
+
+    # Apply contrast enhancement
+    masked_ndvi_contrast = ndvi_contrast(masked_ndvi_array)
+
+    # Scale the contrast-enhanced NDVI array to 0-255 range
+    masked_ndvi_scaled = ((masked_ndvi_contrast - np.nanmin(masked_ndvi_contrast)) / (np.nanmax(masked_ndvi_contrast) - np.nanmin(masked_ndvi_contrast))) * 100
+    masked_ndvi_scaled = masked_ndvi_scaled.astype(np.uint8)
+    ndvi_val = np.mean(masked_ndvi_scaled)
+    print(ndvi_val)
+    masked_ndvi_scaled = ((masked_ndvi_contrast - np.nanmin(masked_ndvi_contrast)) / (np.nanmax(masked_ndvi_contrast) - np.nanmin(masked_ndvi_contrast))) * 150
+    masked_ndvi_scaled = masked_ndvi_scaled.astype(np.uint8)
+    color_map = cv2.applyColorMap(masked_ndvi_scaled, fastie)
     return HttpResponse("Done")
 
     
