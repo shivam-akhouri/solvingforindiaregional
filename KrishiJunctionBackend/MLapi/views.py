@@ -24,6 +24,17 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 env = environ.Env()
 environ.Env.read_env(env_file=Path().joinpath(BASE_DIR, "KrishiJunctionBackend", ".env"))
 
+from google.cloud import storage
+
+client = storage.Client.from_service_account_json('agtech-382514-54e60772be23.json')
+bucket = client.get_bucket("imagedata4rpi")
+
+
+def sendToCLoud(img, blob):
+    path = '/home/shivam_akhouri2020/solvingforindiaregional/KrishiJunctionBackend/MLapi/' + img
+    with open(path, 'rb') as f:
+        blob.upload_from_file(f, content_type = 'image/png')
+    print(img + " uploaded successfully!")
 
 # Create your views here.
 def yeild_prediction(request):
@@ -122,6 +133,10 @@ def ndvi(request):
     boxes, logits, phrases = predict(model = gdmodel, device="cpu", image = image, caption = "plant", box_threshold = 0.3, text_threshold = 0.25)
     frame = annotate(image_source = image_source, boxes = boxes, logits = logits, phrases = phrases)
     frame = frame[...,::-1]
+    temp_frame = Image.fromarray(frame)
+    temp_frame.save("detected_plant.png")
+    blob = bucket.blob("frame_image/rpi001.png")
+    sendToCLoud("detected_plant.png", blob)
 
     sam = SamPredictor(build_sam(checkpoint="/home/shivam_akhouri2020/solvingforindiaregional/GroundingDINO/sam_vit_h_4b8939.pth").to(device))
     print("Reached Load Model")
