@@ -15,8 +15,15 @@ from sklearn import metrics
 import datetime
 import plotly.express as px
 from pycaret.regression import *
+import environ
+from pathlib import Path
 
-cred = firebase_admin.credentials.Certificate("D:\hackathon\GFG\KrishiJunctionBackend\soilapi\solvingforind-firebase-adminsdk-eeo83-44ba4946bc.json")
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+env = environ.Env()
+environ.Env.read_env(env_file=Path().joinpath(BASE_DIR, "KrishiJunctionBackend", ".env"))
+
+cred = firebase_admin.credentials.Certificate(env("FIREBASE_CERTIFICATE"))
 app = firebase_admin.initialize_app(cred)
 firestore_client = firestore.client()
 
@@ -65,7 +72,7 @@ def crop_pred(request):
     humid = request.GET['humidity']
     ph = request.GET['ph']
     rainfall = request.GET['rainfall']
-    model = pickle.load(open('D:\hackathon\GFG\KrishiJunctionBackend\soilapi\crop_pred.pkl','rb'))
+    model = pickle.load(open(env("CROP_PREDICTION_MODEL"),'rb'))
     output = model.predict([[n, p, k, temp, humid, ph, rainfall]])[0]
     print(output)
     return JsonResponse({
@@ -74,7 +81,7 @@ def crop_pred(request):
     }, safe=False)
 
 def fert_pred(request):
-    model = pickle.load(open("D:\hackathon\GFG\KrishiJunctionBackend\soilapi\classifier.pkl", "rb"))
+    model = pickle.load(open(env("FERT_PREDICTION_MODEL"), "rb"))
     output = model.predict([[5,2,4,2,6,4,6,1]])[0]
     mappings= {
         "0": "Urea",
@@ -91,7 +98,7 @@ def fert_pred(request):
         "data": mappings[str(output)]
     }, safe=False)
 
-def oneyearprediction(request):
+def oneyearpredictionold(request):
     i = request.GET['nutrient']
     start_date = pd.to_datetime('2015-01-01')
     end_date = pd.to_datetime('2022-12-01')
@@ -153,17 +160,55 @@ def oneyearprediction(request):
     predictions = predict_model(trained_model, data=data)
     predictions['Date'] = pd.date_range(start='2015-01-01', end='2022-12-01', freq='MS')
     final_best = finalize_model(trained_model)
-
     future_dates = pd.date_range(start='2023-01-01', end='2023-12-01', freq='MS')
     future_df = pd.DataFrame()
     future_df['Month'] = [i.month for i in future_dates]
     future_df['Year'] = [i.year for i in future_dates]
     future_df['Series'] = np.arange(97, (97 + len(future_dates)))
-
     predictions_future = predict_model(final_best, data=future_df)
     concat_df = pd.concat([data, predictions_future], axis=0)
     concat_df_i = pd.date_range(start='2015-01-01', end='2023-12-01', freq='MS')
     concat_df.set_index(concat_df_i, inplace=True)
     print(concat_df)
+    result = concat_df.to_json(orient='records')
+    return JsonResponse({"data": json.loads(result)}, safe = False)
+
+def oneyearprediction(request):
+    i = request.GET['nutrient']
+    data = pd.read_csv(env("ONE_YEAR_PREDICTION"))
+    data['Date'] = pd.to_datetime(data['Date'])
+    data['Month'] = data['Date'].dt.month
+    data['Year'] = data['Date'].dt.year
+    data['Series'] = np.arange(1, len(data) + 1)
+    data = data[['Series', 'Year', 'Month', i]]
+    print(data.head())
+    train = data[(data['Year'] >= 2020) & (data['Year'] <= 2021)]
+    test = data[(data['Year'] > 2021) & (data['Year'] <= 2022)]
+    print(train.shape, test.shape)
+    # initialize setup
+    s = setup(
+        data=train,
+        test_data=test,
+        target=i,
+        fold_strategy='timeseries',
+        numeric_features=['Year', 'Series'],
+        fold=3,
+        transform_target=True,
+        session_id=123
+    )
+    model = create_model('xgboost')
+    trained_model = tune_model(model, optimize='MAE')
+    predictions = predict_model(trained_model, data=data)
+    predictions['Date'] = pd.date_range(start='2015-01-01', end='2022-12-01', freq='MS')
+    final_best = finalize_model(trained_model)
+    future_dates = pd.date_range(start='2023-01-01', end='2023-12-01', freq='MS')
+    future_df = pd.DataFrame()
+    future_df['Month'] = [i.month for i in future_dates]
+    future_df['Year'] = [i.year for i in future_dates]
+    future_df['Series'] = np.arange(97, (97 + len(future_dates)))
+    predictions_future = predict_model(final_best, data=future_df)
+    concat_df = pd.concat([data, predictions_future], axis=0)
+    concat_df_i = pd.date_range(start='2015-01-01', end='2023-12-01', freq='MS')
+    concat_df.set_index(concat_df_i, inplace=True)
     result = concat_df.to_json(orient='records')
     return JsonResponse({"data": json.loads(result)}, safe = False)

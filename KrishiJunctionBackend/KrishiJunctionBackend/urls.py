@@ -20,5 +20,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path("sensors/", include("sensorsapi.urls")),
     path("soil/", include("soilapi.urls")),
-    path("users/", include("userapi.urls"))
+    path("users/", include("userapi.urls")),
+    path("mlapi/", include("MLapi.urls"))
 ]

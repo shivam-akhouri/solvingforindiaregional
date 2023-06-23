@@ -9,8 +9,17 @@ import pyrebase
 import openai
 from colorama import Fore, Back, Style
 from googletrans import Translator
+import datetime
+import pathlib
+import environ
 
-cred = firebase_admin.credentials.Certificate("D:\hackathon\GFG\KrishiJunctionBackend\soilapi\solvingforind-firebase-adminsdk-eeo83-44ba4946bc.json")
+
+BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
+# Initialise environment variables
+env = environ.Env()
+environ.Env.read_env(env_file=pathlib.Path().joinpath(BASE_DIR, "KrishiJunctionBackend", ".env"))
+
+cred = firebase_admin.credentials.Certificate(env("FIREBASE_CERTIFICATE"))
 app = firebase_admin.initialize_app(cred, name="userapp")
 firestore_client = firestore.client()
 
@@ -36,7 +45,7 @@ def chatbot(request):
         "telugu": "te",
         "hindi": "hi",
     }
-    openai.api_key = "..."
+    openai.api_key = env("OPENAI_KEY")
 
     INSTRUCTIONS = """AgriBot is an AI-powered chatbot assistant developed for the "Krishi Junction" mobile application. As AgriBot, my primary goal is to provide farmers with helpful insights related to precision farming techniques. To ensure optimal performance and maintain a focused domain, please adhere to the following guidelines:
 
@@ -401,11 +410,6 @@ Main Features of the "Krishi Junction" Application:
     #     })
 
 # Create your views here.
-def signup(request):
-    return HttpResponse("Hello world")
-
-def signin(request):
-    pass
 
 def deleteUser(request):
     body = json.loads(request.body)
@@ -429,7 +433,7 @@ def createUser(request):
     latitude = body['latitude']
     longitude = body['longitude']
     try:
-        doc_ref = firestore_client.collection(f"users/{phoneNumber}/user").document("details")
+        doc_ref = firestore_client.collection(f"users/{phoneNumber}/profile").document("details")
         doc_ref.set({
             "phone": str(phoneNumber),
             "latitude": latitude,
@@ -444,21 +448,10 @@ def createUser(request):
             "message": "Something went wrong! Please try after sometime."
         })
 
-def checkUser(request):
-    body = json.loads(request.body)
-    phoneNumber = body['phone']
+def checkUser(phoneNumber):
     try:
         is_doc = firestore_client.collection(f"users/{phoneNumber}/user").document("details").get().exists
-        if is_doc is True:
-            return JsonResponse({
-                "status":"success",
-                "message": "Document Found"
-            }, safe=False)
-        else:
-            return JsonResponse({
-                "status": "Fail",
-                "message": "Document not found"
-            }, safe=False)
+        return is_doc
     except:
         return JsonResponse({
             "status": "Error"
@@ -483,7 +476,182 @@ def updateProfile(request):
         return JsonResponse({
             "Status":"error",
             "message": "Something went wrong! Please try after sometime."
-        })
+        }, safe=False, status=500)
 
-def logout(request):
-    pass
+def createTask(request):
+  body = json.loads(request.body)
+  phoneNumber = body['user']
+  task = body['task']
+  deadline = body['deadline']
+  # try:
+  doc_ref = firestore_client.collection(f'users/{phoneNumber}/task').document(f"{int(datetime.datetime.now().timestamp()*1000000)}")
+  doc_ref.set({
+    "task": task,
+    "deadline": deadline,
+    "completed": False
+  })
+  return JsonResponse({
+          "status": "success"
+      }, safe=False)
+  # except:
+  #   return JsonResponse({
+  #           "Status":"error",
+  #           "message": "Something went wrong! Please try after sometime."
+  #       }, safe=False, status=500)
+
+def deleteTask(request):
+  body = json.loads(request.body)
+  phoneNumber = body['user']
+  taskId = body['id']
+  try:
+    doc_ref = firestore_client.collection(f'users/{phoneNumber}/task').document(f"{taskId}")
+    doc_ref.delete()
+    return JsonResponse({
+            "status": "success"
+        }, safe=False)
+  except:
+    return JsonResponse({
+            "Status":"error",
+            "message": "Something went wrong! Please try after sometime."
+        }, safe=False, status=500)
+
+def getTasks(request):
+  body = json.loads(request.body)
+  phoneNumber = body['user']
+  try:
+    docs = firestore_client.collection(f'users/{phoneNumber}/task').stream()
+    result = []
+    for doc in docs:
+      result.append({"id": doc.id, "data": doc.to_dict()})
+    return JsonResponse({
+            "status": "success",
+            "data": result
+        }, safe=False)
+  except:
+    return JsonResponse({
+            "Status":"error",
+            "message": "Something went wrong! Please try after sometime."
+        }, safe=False, status=500)
+
+def createCrop(request):
+  body = json.loads(request.body)
+  phoneNumber = body['user']
+  cropName = body['crop']
+  latitude = body['latitude']
+  longitude = body['longitude']
+  sensor1 = body['sensornpk']
+  sensor2 = body['sensorother']
+  try:
+    doc_ref = firestore_client.collection(f'users/{phoneNumber}/crops').document(f"{cropName}-{int(datetime.datetime.now().timestamp()*1000000)}")
+    doc_ref.set({
+      "crop": cropName,
+      "latitude": latitude,
+      "longitude": longitude,
+      "sensor1": sensor1,
+      "sensor2": sensor2,
+      "avgndvi": "Not Available",
+      "crop_prediction": "Not Available",
+      "fertilizer_prediction": "Not Available",
+      "crop_inference": "Not Available"
+    })
+    return JsonResponse({
+            "status": "success"
+        }, safe=False)
+  except:
+    return JsonResponse({
+            "Status":"error",
+            "message": "Something went wrong! Please try after sometime."
+        }, safe=False, status=500)
+
+def deleteCrop(request):
+  body = json.loads(request.body)
+  phoneNumber = body['user']
+  cropId = body['id']
+  try:
+    doc_ref = firestore_client.collection(f'users/{phoneNumber}/crops').document(f"{cropId}")
+    doc_ref.delete()
+    return JsonResponse({
+            "status": "success"
+        }, safe=False)
+  except:
+    return JsonResponse({
+            "Status":"error",
+            "message": "Something went wrong! Please try after sometime."
+        }, safe=False, status=500)
+
+def getCrops(request):
+  body = json.loads(request.body)
+  phoneNumber = body['user']
+  try:
+    docs = firestore_client.collection(f'users/{phoneNumber}/crops').stream()
+    result = []
+    for doc in docs:
+      result.append({"id": doc.id, "data": doc.to_dict()})
+    return JsonResponse({
+            "status": "success",
+            "data": result
+        }, safe=False)
+  except:
+    return JsonResponse({
+            "Status":"error",
+            "message": "Something went wrong! Please try after sometime."
+        }, safe=False, status=500)
+
+def addSensor(request):
+  body = json.loads(request.body)
+  phoneNumber = body['user']
+  sensorId= body['id']
+  sensorType=  body['type']
+  health = body['health']
+  status= body['status']
+  try:
+    doc_ref = firestore_client.collection(f'users/{phoneNumber}/sensors').document(f"{sensorId}")
+    doc_ref.set({
+      "id": sensorId,
+      "type": sensorType,
+      "health": health,
+      "Status": status
+    })
+    return JsonResponse({
+            "status": "success"
+        }, safe=False)
+  except:
+    return JsonResponse({
+            "Status":"error",
+            "message": "Something went wrong! Please try after sometime."
+        }, safe=False, status=500)
+
+def deleteSensor(request):
+  body = json.loads(request.body)
+  phoneNumber = body['user']
+  sensorId= body['id']
+  sensorType= body['type']
+  try:
+    doc_ref = firestore_client.collection(f'users/{phoneNumber}/sensors').document(f"{sensorId}")
+    doc_ref.delete()
+    return JsonResponse({
+            "status": "success"
+        }, safe=False)
+  except:
+    return JsonResponse({
+            "Status":"error",
+            "message": "Something went wrong! Please try after sometime."
+        }, safe=False, status=500)
+        
+def getSensors(request):
+  body = json.loads(request.body)
+  phoneNumber = body['user']
+  try:
+    docs = firestore_client.collection(f'users/{phoneNumber}/sensors').stream()
+    result = []
+    for doc in docs:
+      result.append(doc.to_dict())
+    return JsonResponse({
+            "status": "success",
+            "data": result
+        }, safe=False)
+  except:
+    return JsonResponse({
+            "Status":"error",
+            "message": "Something went wrong! Please try after sometime."
+        }, safe=False, status=500)
