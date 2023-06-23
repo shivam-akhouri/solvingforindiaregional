@@ -26,7 +26,7 @@ environ.Env.read_env(env_file=Path().joinpath(BASE_DIR, "KrishiJunctionBackend",
 
 from google.cloud import storage
 
-client = storage.Client.from_service_account_json('agtech-382514-54e60772be23.json')
+client = storage.Client.from_service_account_json('/home/shivam_akhouri2020/solvingforindiaregional/KrishiJunctionBackend/MLapi/agtech-382514-54e60772be23.json')
 bucket = client.get_bucket("imagedata4rpi")
 
 
