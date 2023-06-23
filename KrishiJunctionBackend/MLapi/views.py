@@ -154,9 +154,6 @@ def ndvi(request):
             )
         return masks.cpu()
 
-    segmented_frame_masks = segment(image_source, sam, boxes=boxes)
-    mask = segmented_frame_masks[3][0].numpy()
-    print("Segmention Done")
     def contrast_segment(im):
         in_min = np.percentile(im, 5)
         in_max = np.percentile(im, 95)
@@ -166,15 +163,6 @@ def ndvi(request):
         out *= ((out_max - out_min) / (in_max - in_min))
         out += out_min
         return out.astype(np.uint8)
-    imgs = image_source.copy()
-    contrasted = contrast_segment(imgs)
-    imgc = np.zeros_like(imgs)
-    print("Contrasted Segmentation Done")
-    x, y = mask.shape
-    for i in range(x):
-        for j in range(y):
-            if(mask[i][j]):
-                imgc[i][j] = contrasted[i][j]
     def ndvi_segment(image, mask):
         x, y, z = image.shape
         ndvi_img = np.zeros_like(mask)
@@ -190,31 +178,57 @@ def ndvi(request):
                     ndvi_img[i][j] = n/d
 
         return (ndvi_img).astype(np.uint8)
-
-    ndvi = ndvi_segment(imgc, mask)
     def ndvi_contrast(image):
         image_normalized = (image - np.nanmin(image)) / (np.nanmax(image) - np.nanmin(image))
         image_contrast = (image_normalized - 0.5) * 2
         return image_contrast
 
-    # Assuming you already have the NDVI and mask arrays
-    ndvi_array = np.array(ndvi)
-    mask_array = np.array(mask)
+    print("Segmention Done")
+    segmented_frame_masks = segment(image_source, sam, boxes=boxes)
+    counter = 0
+    for segmented_frame_mask in segmented_frame_masks:
+        imgs = image_source.copy()
+        mask = segmented_frame_mask[0].numpy()
+    # mask = segmented_frame_masks[0][0].numpy()
+        contrasted = contrast_segment(imgs)
+        imgc = np.zeros_like(imgs)
+        print("Contrasted Segmentation Done")
+        x, y = mask.shape
+        for i in range(x):
+            for j in range(y):
+                if(mask[i][j]):
+                    imgc[i][j] = contrasted[i][j]
+        
+        ndvi = ndvi_segment(imgc, mask)
+    
 
-    # Apply the mask to the NDVI array
-    masked_ndvi_array = np.where(mask_array > 0, ndvi_array, np.nan)
+        # Assuming you already have the NDVI and mask arrays
+        ndvi_array = np.array(ndvi)
+        mask_array = np.array(mask)
 
-    # Apply contrast enhancement
-    masked_ndvi_contrast = ndvi_contrast(masked_ndvi_array)
+        # Apply the mask to the NDVI array
+        masked_ndvi_array = np.where(mask_array > 0, ndvi_array, np.nan)
 
-    # Scale the contrast-enhanced NDVI array to 0-255 range
-    masked_ndvi_scaled = ((masked_ndvi_contrast - np.nanmin(masked_ndvi_contrast)) / (np.nanmax(masked_ndvi_contrast) - np.nanmin(masked_ndvi_contrast))) * 100
-    masked_ndvi_scaled = masked_ndvi_scaled.astype(np.uint8)
-    ndvi_val = np.mean(masked_ndvi_scaled)
-    print(ndvi_val)
-    masked_ndvi_scaled = ((masked_ndvi_contrast - np.nanmin(masked_ndvi_contrast)) / (np.nanmax(masked_ndvi_contrast) - np.nanmin(masked_ndvi_contrast))) * 150
-    masked_ndvi_scaled = masked_ndvi_scaled.astype(np.uint8)
-    color_map = cv2.applyColorMap(masked_ndvi_scaled, fastie)
+        # Apply contrast enhancement
+        masked_ndvi_contrast = ndvi_contrast(masked_ndvi_array)
+
+        # Scale the contrast-enhanced NDVI array to 0-255 range
+        masked_ndvi_scaled = ((masked_ndvi_contrast - np.nanmin(masked_ndvi_contrast)) / (np.nanmax(masked_ndvi_contrast) - np.nanmin(masked_ndvi_contrast))) * 100
+        masked_ndvi_scaled = masked_ndvi_scaled.astype(np.uint8)
+        temp_ndvi_scaled = Image.fromarray(masked_ndvi_scaled)
+        temp_ndvi_scaled.save(f"/home/shivam_akhouri2020/solvingforindiaregional/KrishiJunctionBackend/MLapi/ndvi_scaled{counter}.png")
+        blob = bucket.blob(f"ndvi_scaled/rpi00{counter}.png")
+        sendToCLoud(f"ndvi_scaled{counter}.png", blob)
+
+        ndvi_val = np.mean(masked_ndvi_scaled)
+        print(ndvi_val)
+        masked_ndvi_scaled = ((masked_ndvi_contrast - np.nanmin(masked_ndvi_contrast)) / (np.nanmax(masked_ndvi_contrast) - np.nanmin(masked_ndvi_contrast))) * 150
+        masked_ndvi_scaled = masked_ndvi_scaled.astype(np.uint8)
+        color_map = cv2.applyColorMap(masked_ndvi_scaled, fastie)
+        cv2.imwrite(f"/home/shivam_akhouri2020/solvingforindiaregional/KrishiJunctionBackend/MLapi/color_map{counter}.png", color_map)
+        blob = bucket.blob(f"color_map/rpi00{counter}.png")
+        sendToCLoud(f"color_map{counter}.png", blob)
+
     return HttpResponse("Done")
 
     
