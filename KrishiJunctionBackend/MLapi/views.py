@@ -134,7 +134,7 @@ def ndvi(request):
     frame = annotate(image_source = image_source, boxes = boxes, logits = logits, phrases = phrases)
     frame = frame[...,::-1]
     temp_frame = Image.fromarray(frame)
-    temp_frame.save("detected_plant.png")
+    temp_frame.save("/home/shivam_akhouri2020/solvingforindiaregional/KrishiJunctionBackend/MLapi/detected_plant.png")
     blob = bucket.blob("frame_image/rpi001.png")
     sendToCLoud("detected_plant.png", blob)
 
