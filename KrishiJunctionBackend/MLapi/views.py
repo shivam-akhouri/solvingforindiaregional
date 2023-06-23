@@ -87,7 +87,7 @@ def ndvi(request):
     from groundingdino.util.inference import annotate, predict
     from huggingface_hub import hf_hub_download
     from typing import Tuple
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    device = 'cpu'
     def load_dataset(path):
         images = []
         names = []
