@@ -222,7 +222,7 @@ def ndvi(request):
         blob = bucket.blob(f"ndvi_scaled/rpi00{counter}.png")
         sendToCLoud(f"ndvi_scaled{counter}.png", blob)
 
-        ndvi_val = np.mean(masked_ndvi_array)
+        ndvi_val = np.mean(masked_ndvi_scaled/100)
         print(ndvi_val)
         masked_ndvi_scaled = ((masked_ndvi_contrast - np.nanmin(masked_ndvi_contrast)) / (np.nanmax(masked_ndvi_contrast) - np.nanmin(masked_ndvi_contrast))) * 150
         masked_ndvi_scaled = masked_ndvi_scaled.astype(np.uint8)
