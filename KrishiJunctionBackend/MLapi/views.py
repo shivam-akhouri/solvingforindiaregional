@@ -160,7 +160,6 @@ def ndvi(request):
     print("Cannon: ",len(canon_imgs))
     rpi_img_sources, rpi_imgs, rpi_names = load_images(rpi_img_path)
     print("RPi: ",len(rpi_imgs))
-    print("Reached Load Model")
     def load_model(path, config, device='cpu'):
         args = SLConfig.fromfile(config)
         args.device = device
@@ -195,6 +194,7 @@ def ndvi(request):
     temp = data[data['Number of plants detected'] > 1]
     temp.head()
     sam = SamPredictor(build_sam(checkpoint="/home/shivam_akhouri2020/solvingforindiaregional/GroundingDINO/sam_vit_h_4b8939.pth").to(device))
+    print("Reached Load Model")
     def segment(image, sam_model, boxes):
         sam_model.set_image(image)
         H, W, _ = image.shape
