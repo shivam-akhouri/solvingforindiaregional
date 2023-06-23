@@ -4,4 +4,5 @@ from . import views
 
 urlpatterns = [
     path('yeild_prediction/', views.yeild_prediction),
+    path("ndvi/", views.ndvi)
 ]

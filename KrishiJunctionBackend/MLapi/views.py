@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from sklearn.preprocessing import LabelEncoder
 import pandas as pd
 import numpy as np
@@ -79,4 +79,31 @@ def estimate_income(request):
     })
 
 def ndvi(request):
-    pass
+    import groundingdino.datasets.transforms as T
+    from groundingdino.models import build_model
+    from groundingdino.util import box_ops
+    from groundingdino.util.slconfig import SLConfig
+    from groundingdino.util.utils import clean_state_dict, get_phrases_from_posmap
+    from groundingdino.util.inference import annotate, predict
+    from huggingface_hub import hf_hub_download
+    from typing import Tuple
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    def load_dataset(path):
+        images = []
+        names = []
+        for file_name in os.listdir(path):
+            if file_name.endswith("_rgb.png"):
+                image_path = os.path.join(path, file_name)
+                image = Image.open(image_path).convert("RGB")
+                images.append(image)
+                names.append(file_name.replace("_rgb.png", ""))
+        return images, names
+    canon_img_path = "/home/shivam_akhouri2020/solvingforindiaregional/GroundingDINO/Plant_Phenotyping_Datasets/Plant/Ara2013-Canon"
+    rpi_img_path = "/home/shivam_akhouri2020/solvingforindiaregional/GroundingDINO/Plant_Phenotyping_Datasets/Plant/Ara2013-RPi"
+    canon_imgs, canon_names = load_dataset(canon_img_path)
+    print("Cannon: ",len(canon_imgs))
+    rpi_imgs, rpi_names = load_dataset(rpi_img_path)
+    print("RPi: ",len(rpi_imgs))
+    return HttpResponse("Done")
+
+    
