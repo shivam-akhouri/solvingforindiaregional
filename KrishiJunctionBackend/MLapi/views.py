@@ -178,6 +178,7 @@ def ndvi(request):
                     ndvi_img[i][j] = n/d
 
         return (ndvi_img).astype(np.uint8)
+    result= []
     def ndvi_contrast(image):
         image_normalized = (image - np.nanmin(image)) / (np.nanmax(image) - np.nanmin(image))
         image_contrast = (image_normalized - 0.5) * 2
@@ -205,6 +206,7 @@ def ndvi(request):
         # Assuming you already have the NDVI and mask arrays
         ndvi_array = np.array(ndvi)
         mask_array = np.array(mask)
+        
 
         # Apply the mask to the NDVI array
         masked_ndvi_array = np.where(mask_array > 0, ndvi_array, np.nan)
@@ -220,7 +222,7 @@ def ndvi(request):
         blob = bucket.blob(f"ndvi_scaled/rpi00{counter}.png")
         sendToCLoud(f"ndvi_scaled{counter}.png", blob)
 
-        ndvi_val = np.mean(masked_ndvi_scaled)
+        ndvi_val = np.mean(masked_ndvi_array)
         print(ndvi_val)
         masked_ndvi_scaled = ((masked_ndvi_contrast - np.nanmin(masked_ndvi_contrast)) / (np.nanmax(masked_ndvi_contrast) - np.nanmin(masked_ndvi_contrast))) * 150
         masked_ndvi_scaled = masked_ndvi_scaled.astype(np.uint8)
@@ -228,7 +230,10 @@ def ndvi(request):
         cv2.imwrite(f"/home/shivam_akhouri2020/solvingforindiaregional/KrishiJunctionBackend/MLapi/color_map{counter}.png", color_map)
         blob = bucket.blob(f"color_map/rpi00{counter}.png")
         sendToCLoud(f"color_map{counter}.png", blob)
-
-    return HttpResponse("Done")
+        result.append({"ndvi": ndvi_val, "plant": "plant"+str(counter)})
+        counter+=1
+    return JsonResponse({
+        "data": result,
+    }, safe=False)
 
     
