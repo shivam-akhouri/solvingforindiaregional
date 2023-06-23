@@ -141,7 +141,7 @@ def ndvi(request):
 
     segmented_frame_masks = segment(image_source, sam, boxes=boxes)
     mask = segmented_frame_masks[3][0].numpy()
-    
+    print("Segmention Done")
     def contrast_segment(im):
         in_min = np.percentile(im, 5)
         in_max = np.percentile(im, 95)
@@ -153,7 +153,8 @@ def ndvi(request):
         return out.astype(np.uint8)
     imgs = image_source.copy()
     contrasted = contrast_segment(imgs)
-    imgc = imgs.zeros_like(imgs)
+    imgc = np.zeros_like(imgs)
+    print("Contrasted Segmentation Done")
     x, y = mask.shape
     for i in range(x):
         for j in range(y):
