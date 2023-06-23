@@ -178,7 +178,7 @@ def ndvi(request):
         box_list = []
         plants = []
         for image_source, image, name in zip(image_sources, images, names):
-            boxes, logits, phrases = predict(model = gdmodel, image = image, caption = "plant", box_threshold = 0.3, text_threshold = 0.25)
+            boxes, logits, phrases = predict(model = gdmodel, device=device, image = image, caption = "plant", box_threshold = 0.3, text_threshold = 0.25)
             frame = annotate(image_source = image_source, boxes = boxes, logits = logits, phrases = phrases)
             frame = frame[...,::-1]
             frames.append(frame)
