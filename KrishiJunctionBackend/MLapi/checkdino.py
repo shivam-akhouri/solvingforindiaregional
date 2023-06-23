@@ -125,45 +125,6 @@ data = pd.read_csv(canon_img_path + "/GD_plants_detected.csv")
 temp = data[data['Number of plants detected'] > 1]
 temp.head()
 sam = SamPredictor(build_sam(checkpoint="/home/shivam_akhouri2020/solvingforindiaregional/GroundingDINO/sam_vit_h_4b8939.pth").to(device))
-print("Reached Load Model")
-def segment(image, sam_model, boxes):
-    sam_model.set_image(image)
-    H, W, _ = image.shape
-    boxes_xyxy = box_ops.box_cxcywh_to_xyxy(boxes) * torch.Tensor([W, H, W, H])
-
-    transformed_boxes = sam_model.transform.apply_boxes_torch(boxes_xyxy.to(device), image.shape[:2])
-    masks, _, _ = sam_model.predict_torch(
-        point_coords = None,
-        point_labels = None,
-        boxes = transformed_boxes,
-        multimask_output = False,
-        )
-    return masks.cpu()
-def draw_mask(mask, image):
-    color = np.concatenate([np.random.random(3), np.array([0.8])], axis=0)
-    h, w = mask.shape[-2:]
-    mask_image = mask.reshape(h, w, 1) * color.reshape(1, 1, -1)
-
-    annotated_frame_pil = Image.fromarray(image).convert("RGBA")
-    mask_image_pil = Image.fromarray((mask_image.cpu().numpy() * 255).astype(np.uint8)).convert("RGBA")
-    return np.array(Image.alpha_composite(annotated_frame_pil, mask_image_pil))
-print("Reached Draw_mask")
-def get_segmented_plants(sources, model, boxes, frames, names, path):
-    masks = []
-    for image, box, frame, name in zip(sources, boxes, frames, names):
-        mask = segment(image,model,box)
-        masks.append(mask)
-    return masks
-canon_img_mask = get_segmented_plants(canon_img_sources, sam, canon_img_boxes, canon_img_frames, canon_names, canon_img_path)
-rpi_img_mask = get_segmented_plants(rpi_img_sources, sam, rpi_img_boxes, rpi_img_frames, rpi_names, rpi_img_path)
-def contrast_segment(im):
-    in_min = np.percentile(im, 5)
-    in_max = np.percentile(im, 95)
-    out_min = 0.0
-    out_max = 255.0
-    out = im - in_min
-    out *= ((out_max - out_min) / (in_max - in_min))
-    out += out_min
-    return out.astype(np.uint8)
-contrasted = contrast_segment(imgs)
-print(contrasted)
+import pickle
+f = open("/home/shivam_akhouri2020/solvingforindiaregional/KrishiJunctionBackend/MLapi/sammodel", "wb")
+pickle.dump(sam, f)
