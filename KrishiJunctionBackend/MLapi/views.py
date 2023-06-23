@@ -119,7 +119,7 @@ def ndvi(request):
         return model
 
     gdmodel = load_model("/home/shivam_akhouri2020/solvingforindiaregional/GroundingDINO/groundingdino_swinb_cogcoor.pth", "/home/shivam_akhouri2020/solvingforindiaregional/GroundingDINO/GroundingDINO_SwinB.cfg.py", device)
-    boxes, logits, phrases = predict(model = gdmodel, image = image, caption = "plant", box_threshold = 0.3, text_threshold = 0.25)
+    boxes, logits, phrases = predict(model = gdmodel, device="cpu", image = image, caption = "plant", box_threshold = 0.3, text_threshold = 0.25)
     frame = annotate(image_source = image_source, boxes = boxes, logits = logits, phrases = phrases)
     frame = frame[...,::-1]
 
