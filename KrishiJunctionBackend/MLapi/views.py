@@ -35,7 +35,6 @@ def sendToCLoud(img, blob):
     with open(path, 'rb') as f:
         res = blob.upload_from_file(f, content_type = 'image/png')
     print(img + " uploaded successfully!")
-    print(res)
 
 # Create your views here.
 def yeild_prediction(request):
