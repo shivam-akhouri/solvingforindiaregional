@@ -331,7 +331,7 @@ def chatbot(request):
           iii. Some information about the app will be printed before one chooses "Get Started".
           iv. The user has to login using their phone number, to which an otp will be sent for authentication.
           v. Below is a JSON prompt that describes all the tabs and features available in the app. You need to use this to help the user navigate through the app in case they ask a query regarding it.
-          # """ + my_dict + """
+          # """ + str(my_dict) + """
 
       11. When the user asks for a value that is given in the app (Weather, N, P, K, NDVI, etc.), display the corresponding value for them instead of the directions to reach that tab in the app. Refer to the app structure mentioned in point 10.(v), where you can find the JSON structure of the app.
 
