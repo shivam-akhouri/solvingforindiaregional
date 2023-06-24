@@ -28,6 +28,7 @@ from groundingdino.util.inference import annotate, predict
 from huggingface_hub import hf_hub_download
 from typing import Tuple
 from PIL import ImageEnhance
+import json
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
