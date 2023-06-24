@@ -49,6 +49,13 @@ def sendToCLoud(img, blob):
     print(img + " uploaded successfully!")
 
 # Create your views here.
+def testimageinput(request):
+    image = request.FILES['image']
+    print(image)
+    return HttpResponse("done")
+
+
+
 def yeild_prediction(request):
     # TODO: crop month se kharif ya rabi ya whole year aur state aur distric ka dekhna hai from crop_production csv
     Crop = request.GET['crop']
