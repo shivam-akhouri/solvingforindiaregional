@@ -36,6 +36,9 @@ FIREBASE_CONFIG = {
 
 firebase = pyrebase.initialize_app(FIREBASE_CONFIG)
 auth = firebase.auth()
+
+previous_questions_and_answers = []
+
 def chatbot(request):
   new_question = request.GET['query']
   language = request.GET['language']
