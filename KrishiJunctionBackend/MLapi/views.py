@@ -33,8 +33,9 @@ bucket = client.get_bucket("imagedata4rpi")
 def sendToCLoud(img, blob):
     path = '/home/shivam_akhouri2020/solvingforindiaregional/KrishiJunctionBackend/MLapi/' + img
     with open(path, 'rb') as f:
-        blob.upload_from_file(f, content_type = 'image/png')
+        res = blob.upload_from_file(f, content_type = 'image/png')
     print(img + " uploaded successfully!")
+    print(res)
 
 # Create your views here.
 def yeild_prediction(request):
@@ -78,16 +79,16 @@ def yeild_prediction(request):
     },safe=False)
 
 
-def estimate_income(request):
-    State = "Tamil Nadu"
-    District = "Ariyalur"
+# def estimate_income(request):
+#     State = "Tamil Nadu"
+#     District = "Ariyalur"
     
-    price = prices.loc[(prices['state']==State) &
-                    (prices['district']==District)]
-    price = np.array(price["modal_price"])
-    return JsonResponse({
-        ""
-    })
+#     price = prices.loc[(prices['state']==State) &
+#                     (prices['district']==District)]
+#     price = np.array(price["modal_price"])
+#     return JsonResponse({
+#         "price": price
+#     })
 
 def ndvi(request):
     import groundingdino.datasets.transforms as T
@@ -222,7 +223,7 @@ def ndvi(request):
         blob = bucket.blob(f"ndvi_scaled/rpi00{counter}.png")
         sendToCLoud(f"ndvi_scaled{counter}.png", blob)
 
-        ndvi_val = np.mean(masked_ndvi_scaled/100)
+        ndvi_val = np.mean(masked_ndvi_scaled/10)
         print(ndvi_val)
         masked_ndvi_scaled = ((masked_ndvi_contrast - np.nanmin(masked_ndvi_contrast)) / (np.nanmax(masked_ndvi_contrast) - np.nanmin(masked_ndvi_contrast))) * 150
         masked_ndvi_scaled = masked_ndvi_scaled.astype(np.uint8)
