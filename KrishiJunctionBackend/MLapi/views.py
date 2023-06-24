@@ -19,6 +19,17 @@ import os
 import environ
 from pathlib import Path
 
+import groundingdino.datasets.transforms as T
+from groundingdino.models import build_model
+from groundingdino.util import box_ops
+from groundingdino.util.slconfig import SLConfig
+from groundingdino.util.utils import clean_state_dict, get_phrases_from_posmap
+from groundingdino.util.inference import annotate, predict
+from huggingface_hub import hf_hub_download
+from typing import Tuple
+from PIL import ImageEnhance
+
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 env = environ.Env()
@@ -90,15 +101,9 @@ def yeild_prediction(request):
 #     })
 
 def ndvi(request):
-    import groundingdino.datasets.transforms as T
-    from groundingdino.models import build_model
-    from groundingdino.util import box_ops
-    from groundingdino.util.slconfig import SLConfig
-    from groundingdino.util.utils import clean_state_dict, get_phrases_from_posmap
-    from groundingdino.util.inference import annotate, predict
-    from huggingface_hub import hf_hub_download
-    from typing import Tuple
-    from PIL import ImageEnhance
+    body = json.loads(request.body)
+    user = body['user']
+    crop = body['crop']
     device = 'cpu'
     fastie = np.zeros((256, 1, 3), dtype=np.uint8)
     fastie[:, 0, 2] = [255, 250, 246, 242, 238, 233, 229, 225, 221, 216, 212, 208, 204, 200, 195, 191, 187, 183, 178, 174, 170, 166, 161, 157, 153, 149, 145, 140, 136, 132, 128, 123, 119, 115, 111, 106, 102, 98, 94, 90, 85, 81, 77, 73, 68, 64, 60, 56, 52, 56, 60, 64, 68, 73, 77, 81, 85, 90, 94, 98, 102, 106, 111, 115, 119, 123, 128, 132, 136, 140, 145, 149, 153, 157, 161, 166, 170, 174, 178, 183, 187, 191, 195, 200, 204, 208, 212, 216, 221, 225, 229, 233, 238, 242, 246, 250, 255, 250, 245, 240, 235, 230, 225, 220, 215, 210, 205, 200, 195, 190, 185, 180, 175, 170, 165, 160, 155, 151, 146, 141, 136, 131, 126, 121, 116, 111, 106, 101, 96, 91, 86, 81, 76, 71, 66, 61, 56, 66, 77, 87, 98, 108, 119, 129, 140, 131, 122, 113, 105, 96, 87, 78, 70, 61, 52, 43, 35, 26, 17, 8, 0, 7, 15, 23, 31, 39, 47, 55, 63, 71, 79, 87, 95, 103, 111, 119, 127, 135, 143, 151, 159, 167, 175, 183, 191, 199, 207, 215, 223, 231, 239, 247, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255]
@@ -133,9 +138,11 @@ def ndvi(request):
     boxes, logits, phrases = predict(model = gdmodel, device="cpu", image = image, caption = "plant", box_threshold = 0.3, text_threshold = 0.25)
     frame = annotate(image_source = image_source, boxes = boxes, logits = logits, phrases = phrases)
     frame = frame[...,::-1]
+    CLOUD_IMAGE_BASE="https://storage.googleapis.com/imagedata4rpi/"
     temp_frame = Image.fromarray(frame)
     temp_frame.save("/home/shivam_akhouri2020/solvingforindiaregional/KrishiJunctionBackend/MLapi/detected_plant.png")
-    blob = bucket.blob("frame_image/rpi001.png")
+    FRAME_IMAGE_PATH = f"{user}/{crop}/frame_image/api001.png"
+    blob = bucket.blob(FRAME_IMAGE_PATH)
     sendToCLoud("detected_plant.png", blob)
 
     sam = SamPredictor(build_sam(checkpoint="/home/shivam_akhouri2020/solvingforindiaregional/GroundingDINO/sam_vit_h_4b8939.pth").to(device))
@@ -187,6 +194,7 @@ def ndvi(request):
     print("Segmention Done")
     segmented_frame_masks = segment(image_source, sam, boxes=boxes)
     counter = 0
+    
     for segmented_frame_mask in segmented_frame_masks:
         imgs = image_source.copy()
         mask = segmented_frame_mask[0].numpy()
@@ -219,7 +227,8 @@ def ndvi(request):
         masked_ndvi_scaled = masked_ndvi_scaled.astype(np.uint8)
         temp_ndvi_scaled = Image.fromarray(masked_ndvi_scaled)
         temp_ndvi_scaled.save(f"/home/shivam_akhouri2020/solvingforindiaregional/KrishiJunctionBackend/MLapi/ndvi_scaled{counter}.png")
-        blob = bucket.blob(f"ndvi_scaled/rpi00{counter}.png")
+        NDVI_SCALED_PATH = f"{user}/{crop}/ndvi_scaled/api00{counter}.png"
+        blob = bucket.blob(NDVI_SCALED_PATH)
         sendToCLoud(f"ndvi_scaled{counter}.png", blob)
 
         ndvi_val = np.mean(masked_ndvi_scaled/10)
@@ -228,12 +237,19 @@ def ndvi(request):
         masked_ndvi_scaled = masked_ndvi_scaled.astype(np.uint8)
         color_map = cv2.applyColorMap(masked_ndvi_scaled, fastie)
         cv2.imwrite(f"/home/shivam_akhouri2020/solvingforindiaregional/KrishiJunctionBackend/MLapi/color_map{counter}.png", color_map)
-        blob = bucket.blob(f"color_map/rpi00{counter}.png")
+        COLOR_MAP_PATH = f"{user}/{crop}/color_map/api00{counter}.png"
+        blob = bucket.blob(COLOR_MAP_PATH)
         sendToCLoud(f"color_map{counter}.png", blob)
-        result.append({"ndvi": ndvi_val, "plant": "plant"+str(counter)})
+        result.append({
+            "ndvi": ndvi_val, 
+            "plant": "plant"+str(counter),
+            "color_map_image": CLOUD_IMAGE_BASE+COLOR_MAP_PATH,
+            "ndvi_map_image": CLOUD_IMAGE_BASE+NDVI_SCALED_PATH
+        })
         counter+=1
     return JsonResponse({
         "data": result,
+        "frame_image": CLOUD_IMAGE_BASE+FRAME_IMAGE_PATH
     }, safe=False)
 
     
