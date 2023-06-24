@@ -468,6 +468,7 @@ def chatbot(request):
     if "stop" in response:
         res = requests.get('https://drone-3r75.onrender.com/stop')
   translator = Translator()
+  print(response)
   text_to_translate = translator.translate(response,
                                           src= 'en',
                                           dest= l[language])
