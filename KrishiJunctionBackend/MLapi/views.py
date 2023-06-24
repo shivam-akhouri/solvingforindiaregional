@@ -111,6 +111,10 @@ def yeild_prediction(request):
 #     })
 
 def ndvi(request):
+    image = request.FILES['image']
+    with open("/home/shivam_akhouri2020/solvingforindiaregional/KrishiJunctionBackend/MLapi/test_image.jpg", "wb+") as destination:
+        for chunk in image.chunks():
+            destination.write(chunk)
     body = json.loads(request.body)
     user = body['user']
     crop = body['crop']
@@ -132,7 +136,7 @@ def ndvi(request):
         image = np.asarray(image_source)
         image_transformed, _ = transform(image_source, None)
         return image, image_transformed
-    image_source, image = load_image("/home/shivam_akhouri2020/solvingforindiaregional/KrishiJunctionBackend/MLapi/plant_image.jpg")
+    image_source, image = load_image("/home/shivam_akhouri2020/solvingforindiaregional/KrishiJunctionBackend/MLapi/test_image.jpg")
     def load_model(path, config, device='cpu'):
         args = SLConfig.fromfile(config)
         args.device = device
