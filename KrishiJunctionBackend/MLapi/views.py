@@ -51,7 +51,9 @@ def sendToCLoud(img, blob):
 # Create your views here.
 def testimageinput(request):
     image = request.FILES['image']
-    print(image)
+    with open("/home/shivam_akhouri2020/solvingforindiaregional/KrishiJunctionBackend/MLapi/test_image.jpg", "wb+") as destination:
+        for chunk in image.chunks():
+            destination.write(chunk)
     return HttpResponse("done")
 
 
