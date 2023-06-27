@@ -7,5 +7,6 @@ urlpatterns = [
     path("npkvalue/", views.npkvalue),
     path("crop_pred/", views.crop_pred),
     path("fert_pred/", views.fert_pred),
-    path("oneyearplan/", views.oneyearprediction)
+    path("oneyearplan/", views.oneyearprediction),
+    path("npksensor/", views.get_mqtt),
 ]

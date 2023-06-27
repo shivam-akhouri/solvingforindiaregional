@@ -212,3 +212,19 @@ def oneyearprediction(request):
     concat_df.set_index(concat_df_i, inplace=True)
     result = concat_df.to_json(orient='records')
     return JsonResponse({"data": json.loads(result)}, safe = False)
+
+def get_mqtt(request):
+    try:
+        docs = firestore_client.collection(f'npkvalue/values/values').stream()
+        result = []
+        for doc in docs:
+            result.append({"id": doc.id, "data": doc.to_dict()})
+            return JsonResponse({
+                    "status": "success",
+                    "data": result
+                }, safe=False)
+    except:
+        return JsonResponse({
+                "Status":"error",
+                "message": "Something went wrong! Please try after sometime."
+            }, safe=False, status=500)
